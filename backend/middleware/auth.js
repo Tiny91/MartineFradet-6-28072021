@@ -6,15 +6,13 @@ module.exports = (req, res, next) => {
         const decodedToken = jwt.verify(token, 'random-secret-key');
         const userId = decodedToken.userId;
         if (req.body.userId && req.body.userId !== userId) {
-          throw 'Invalid user ID';
+          throw 'utilisateur non valide';
         } 
         else {
           next();
         }
     } 
     catch {
-        res.status(401).json({
-          error: new Error('authentification impossible')
-        });
-    }
+        res.status(403).json({error})
+        }
 };
