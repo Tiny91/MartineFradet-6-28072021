@@ -1,60 +1,59 @@
 const Sauce = require('../models/sauce');
  const fs = require('fs');
-const sauce = require('../models/sauce');
 
  //ajout d'une sauce 
- exports.createSauce = (req ,res , next) => {
+exports.createSauce = (req ,res , next) => {
   const sauceObject = JSON.parse(req.body.sauce);
   const sauce = new Sauce({
-  ...sauceObject,
-  imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+    ...sauceObject,
+    imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
   });// Url dynamique selon chemin serveur
   // enregistrement nouvelle sauce dans la base de données
-    sauce.save()
+  sauce.save()
     .then(() => res.status(201).json({ message: 'sauce ajoutée !'}))
     .catch(error => res.status(400).json({ error }));
 };
 
 // Afficher toutes les sauces
 exports.getAllSauces = (req ,res , next) => {
-    Sauce.find()
+  Sauce.find()
     .then(sauce => res.status(200).json(sauce))
     .catch(error => res.status(400).json({ error }));
 };
 
 // Afficher une sauce selon l'id
 exports.getOneSauce = (req ,res , next) => {
-    Sauce.findOne({ _id: req.params.id })
+  Sauce.findOne({ _id: req.params.id })
     .then(sauces => res.status(200).json(sauces))
     .catch(error => res.status(404).json({ error }));
 };
 
 //modif d'une sauce (image ou texte)
 exports.modifySauce = (req ,res , next) => {
-    const sauceObject = req.file ?
+  const sauceObject = req.file ?
     //si modif de l'image 
     {...JSON.parse(req.body.sauce),
     imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`}
     //si pas de modif image
     : { ...req.body };  
     Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
-    .then(() => res.status(200).json({ message: 'sauce modifiée !'}))
-    .catch(error => res.status(400).json({ error }));
+      .then(() => res.status(200).json({ message: 'sauce modifiée !'}))
+      .catch(error => res.status(400).json({ error }));
 };
 
 //supression d'une sauce
 exports.deleteSauce = (req ,res , next) => {
-    Sauce.findOne({ _id: req.params.id })
+  Sauce.findOne({ _id: req.params.id })
     // recherche du nom du fichier image pour le sup
-    .then(sauce => {
-      const filename = sauce.imageUrl.split('/images/')[1];// split de l'URL et recup de du nom de fichier
-      fs.unlink(`images/${filename}`, () => {
-        Sauce.deleteOne({ _id: req.params.id })
-          .then(() => res.status(200).json({ message: 'sauce supprimée !'}))
-          .catch(error => res.status(400).json({ error }));
-      });
-    })
-    .catch(error => res.status(500).json({ error }));
+  .then(sauce => {
+    const filename = sauce.imageUrl.split('/images/')[1];// split de l'URL et recup de du nom de fichier
+    fs.unlink(`images/${filename}`, () => {
+      Sauce.deleteOne({ _id: req.params.id })
+      .then(() => res.status(200).json({ message: 'sauce supprimée !'}))
+      .catch(error => res.status(400).json({ error }));
+    });
+  })
+  .catch(error => res.status(500).json({ error }));
 };
 
 //Noter une sauce (like et dislike)
@@ -94,4 +93,4 @@ exports.noteSauce = (req, res, next) => {
     .then(() => res.status(200).json({ message: 'note prise en compte'}))
     .catch(error => res.status(400).json({ error }));
   }
-}
+};
