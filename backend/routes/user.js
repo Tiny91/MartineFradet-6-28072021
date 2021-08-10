@@ -4,7 +4,10 @@ const router = express.Router();
 
 const userCtrl = require('../controllers/user');
 
-router.post('/signup', userCtrl.signup);
+//validation de la création de mot de passe selon modèle
+const passwordValid = require('../middleware/pwdValid');
+
+router.post('/signup', passwordValid, userCtrl.signup);
 router.post('/login', userCtrl.login);
 
 module.exports = router;
