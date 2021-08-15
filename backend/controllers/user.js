@@ -1,6 +1,5 @@
 // hashage du mot de passe
 const bcrypt =require('bcrypt');
-
 // Sécurite de  l'authentification par token
 const jwt = require('jsonwebtoken');
 
@@ -15,9 +14,11 @@ exports.signup = (req, res, next) => {
       .then(()=> res.status(201).json ({message: "utilisateur créé"}))
       .catch(error => res.status(400).json({error}));
   })
-  .catch(error => res.status(500).json({error}));
+  .catch(error => {
+    const message = 'le compte ne peut etre créé, réessayez plus tard' 
+    res.status(500).json({message, data:error })
+  });
 };
-
 
 //connexion avec verif du nom et du mdp
 exports.login = (req, res, next) => {
@@ -33,7 +34,7 @@ exports.login = (req, res, next) => {
         }
         res.status(200).json({
           userId: user._id,
-          token: jwt.sign({userId : user._id},'random-secret-key',{expiresIn: "6h"})
+          token: jwt.sign({userId : user._id},`${process.env.PRIVATEKEY}`,{expiresIn: "6h"})
         });
       })
       .catch(error => res.status(500).json({ error }));

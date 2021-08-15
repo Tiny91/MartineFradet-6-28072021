@@ -1,6 +1,5 @@
 const express = require('express');
 const app = express();
-
 const mongoose = require('mongoose');
 
 //gestion des variables d'environnement
@@ -14,7 +13,6 @@ app.use (helmet());
 const path = require('path');
 
 const sauceRoutes = require('./routes/sauce');
-
 const userRoutes = require ('./routes/user');
 
 //connexion à MongoDB
