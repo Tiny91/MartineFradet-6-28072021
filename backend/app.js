@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
+const session =require('cookie-session');
 
 //gestion des variables d'environnement
 const dotenv = require('dotenv').config();
@@ -32,7 +33,18 @@ app.use((req, res, next) => {
 app.use(express.urlencoded({extended:true}));
 app.use(express.json());
 
-
+//Sécurisation cookies avec expiration à 1h
+const expiryDate = new Date(Date.now() + 3600000); // 1 heure (60 * 60 * 1000)
+app.use(session({
+  name: 'session',
+  secret: process.env.COOKIEKEY,
+  cookie: {
+    secure: true,
+    httpOnly: true,
+    domain: 'http://localhost:3000',
+    expires: expiryDate
+  }
+}));
 // chemin middleware sauces - utilisateurs - images
 app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use('/api/sauces',sauceRoutes);

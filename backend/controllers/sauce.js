@@ -41,17 +41,32 @@ exports.getOneSauce = (req ,res ) => {
 };
 
 //modif d'une sauce (image ou texte)
-  exports.modifySauce = (req ,res ) => {
-          const sauceObject = req.file ?
-            //si modif de l'image 
-            {...JSON.parse(req.body.sauce),
-            imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`}
-           //si pas de modif image
-           : { ...req.body };  
+exports.modifySauce = (req, res, next) => {
+    if (req.file) {
+      // si modif de l'image=> supp ancienne image 
+      Sauce.findOne({ _id: req.params.id })
+        .then(sauce => {
+          const filename = sauce.imageUrl.split('/images/')[1];
+          fs.unlink(`images/${filename}`, () => {
+            // ajout nouvelle image et update des infos
+            const sauceObject = {
+              ...JSON.parse(req.body.sauce),
+              imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+              }
             Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
-              .then(() => res.status(200).json({ message: 'sauce modifiée !'}))
-              .catch(error => res.status(400).json({ error }));
-       };
+            .then(() => res.status(200).json({ message: 'Sauce modifiée!' }))
+            .catch(error => res.status(400).json({ error }));
+          })
+         })
+        .catch(error => res.status(500).json({ error }));
+    } else {
+        // pas de modif image
+        const sauceObject = { ...req.body };
+        Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
+          .then(() => res.status(200).json({ message: 'Sauce modifiée!' }))
+          .catch(error => res.status(400).json({ error }));
+    }
+};
 
 //supression d'une sauce
 exports.deleteSauce = (req ,res ) => {
